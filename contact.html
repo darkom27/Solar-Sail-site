@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact — Shadow Solar Sail</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
+
+    .fade-in { opacity:0; transform:translateY(24px); transition: opacity 0.65s ease, transform 0.65s ease; }
+    .fade-in.visible { opacity:1; transform:none; }
+
+    /* Full-page contact layout */
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 48px;
+      align-items: start;
+      margin-top: 60px;
+    }
+    @media(max-width:800px){
+      .contact-layout { grid-template-columns: 1fr; }
+    }
+
+    /* Left panel — author card */
+    .author-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      position: sticky;
+      top: 90px;
+    }
+
+    .avatar-ring {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e3a6e 0%, #0c1a3a 100%);
+      border: 2px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.6em;
+      margin: 0 auto 24px;
+      box-shadow: 0 0 0 6px rgba(96,165,250,0.1);
+    }
+
+    .author-card .author-name {
+      text-align: center;
+      font-size: 1.5em;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .author-card .author-title {
+      text-align: center;
+      font-size: 0.8em;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+
+    .author-card .author-bio {
+      font-size: 0.97em;
+      color: var(--text-muted);
+      line-height: 1.8;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .skills-list {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .skills-list li {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 0.82em;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .skills-list li:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      cursor: default;
+    }
+
+    .project-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(96,165,250,0.06);
+      border: 1px solid rgba(96,165,250,0.2);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 12px;
+    }
+    .project-badge .pb-icon { font-size: 1.4em; flex-shrink:0; }
+    .project-badge .pb-name { font-size: 0.95em; font-weight: 600; color: var(--text); }
+    .project-badge .pb-desc { font-size: 0.82em; color: var(--text-muted); }
+
+    /* Right panel — contact main */
+    .contact-main { display: flex; flex-direction: column; gap: 28px; }
+
+    .contact-cta-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 44px 40px;
+      text-align: center;
+    }
+
+    .contact-cta-card .cta-icon { font-size: 3em; margin-bottom: 20px; display: block; }
+    .contact-cta-card h2 { border: none; padding: 0; margin: 0 0 12px; font-size: 1.9em; color: var(--text); }
+    .contact-cta-card .cta-sub { color: var(--text-muted); font-size: 1.05em; margin-bottom: 36px; line-height: 1.8; }
+
+    .email-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: rgba(96,165,250,0.1);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+      padding: 18px 40px;
+      border-radius: 12px;
+      font-size: 1.15em;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      transition: all 0.25s;
+      margin-bottom: 14px;
+      width: 100%;
+      max-width: 460px;
+      box-sizing: border-box;
+    }
+    .email-button:hover {
+      background: var(--accent);
+      color: #000;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(96,165,250,0.3);
+    }
+    .email-button .mail-icon { font-size: 1.3em; }
+
+    .email-note {
+      font-size: 0.86em;
+      color: var(--text-dim);
+      margin: 8px 0 0;
+    }
+
+    /* Topic chips */
+    .topic-section { margin-top: 10px; }
+    .topic-section h3 { font-size: 1em; color: var(--text-muted); margin-bottom: 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .topic-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.88em;
+      color: var(--text-muted);
+      cursor: default;
+      transition: all 0.2s;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--text); background: rgba(96,165,250,0.05); }
+    .chip-icon { font-size: 1.1em; }
+
+    /* Info panels */
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:540px){ .info-grid { grid-template-columns: 1fr; } }
+
+    .info-tile {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+    .info-tile .it-icon { font-size: 1.8em; margin-bottom: 10px; }
+    .info-tile .it-label { font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 6px; }
+    .info-tile .it-val { font-size: 0.98em; color: var(--text-muted); font-weight: 500; }
+
+    /* Stars / space decoration */
+    .stars-divider {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 1.4em;
+      letter-spacing: 12px;
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <a href="index.html" class="nav-brand">
+    <span class="brand-main">Shadow Solar Sail</span>
+    <span class="brand-sub">Solar Sail</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="engineering-analysis.html">Engineering Analysis</a></li>
+    <li><a href="realistic-constraints.html">Realistic Constraints</a></li>
+    <li><a href="contact.html" class="active">Contact</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="eyebrow">Get in Touch</div>
+  <h1>Contact</h1>
+  <p>Have questions, corrections, or want to discuss the physics? I'm always open
+     to a good technical conversation. Logic before fantasy — always.</p>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="page-wrapper">
+  <div class="contact-layout">
+
+    <!-- LEFT: Author Profile -->
+    <aside class="author-card fade-in">
+      <div class="avatar-ring">🧑‍💻</div>
+      <div class="author-name">Darko</div>
+      <div class="author-title">Applied Computer Technician</div>
+      <p class="author-bio">
+        An engineer by mindset, a technician by training. Passionate about the intersection
+        of physics, space technology, and the hard truths that emerge when theoretical elegance
+        meets real-world materials and thermodynamics.
+      </p>
+
+      <ul class="skills-list">
+        <li>Thermodynamics</li>
+        <li>Photon Physics</li>
+        <li>Materials Science</li>
+        <li>Stellar Engineering</li>
+        <li>Applied Computing</li>
+        <li>QED Basics</li>
+        <li>Solar Dynamics</li>
+        <li>Critical Analysis</li>
+      </ul>
+
+      <div class="stars-divider">· · ·</div>
+      <p> style="font-size:0.82em; color:var(--text-dim); text-align:center; margin: 16px 0 20px;">
+        Current Projects
+      </p>
+
+      <div> class="project-badge">
+        <div> class="pb-icon">☀️</div>
+        <div>
+          <div class="pb-name">Shadow Solar Sail</div>
+          <div class="pb-desc">Critical analysis of the Shkadov Thruster</div>
+        </div>
+      </div>
+
+      <div class="project-badge">
+        <div class="pb-icon">🔭</div>
+        <div>
+          <div class="pb-name">Megastructure Feasibility</div>
+          <div class="pb-desc">Engineering reality vs theoretical proposals</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Contact CTA + Info -->
+    <main class="contact-main">
+
+      <div class="contact-cta-card fade-in">
+        <span class="cta-icon">✉️</span>
+        <h2>Write to Me</h2>
+        <p class="cta-sub">
+          Whether you disagree with my conclusions, have found an error in the calculations,
+          want to discuss advanced materials that could change the picture, or simply want to
+          talk about stellar engineering — I'd love to hear from you.
+        </p>
+
+        <a href="mailto:solarsailsite@gmail.com" class="email-button">
+          <span class="mail-icon">📧</span>
+          solarsailsite@gmail.com
+        </a>
+        <p class="email-note">Click to open your email client and write directly.</p>
+      </div>
+
+      <!-- Topics -->
+      <div class="card fade-in">
+        <div class="topic-section">
+          <h3>Topics I Welcome</h3>
+          <div class="topic-chips">
+            <div class="chip"><span class="chip-icon">🪞</span> Mirror material suggestions</div>
+            <div class="chip"><span class="chip-icon">🌡️</span> Thermal management solutions</div>
+            <div class="chip"><span class="chip-icon">⚛️</span> QED photon interaction details</div>
+            <div class="chip"><span class="chip-icon">🚀</span> Stellar propulsion concepts</div>
+            <div class="chip"><span class="chip-icon">🔢</span> Calculation corrections</div>
+            <div class="chip"><span class="chip-icon">🌌</span> Megastructure engineering</div>
+            <div class="chip"><span class="chip-icon">🛸</span> Kardashev civilisation tech</div>
+            <div class="chip"><span class="chip-icon">📚</span> Related papers and research</div>
+            <div class="chip"><span class="chip-icon">💡</span> General physics questions</div>
+            <div class="chip"><span class="chip-icon">🤝</span> Collaboration proposals</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info tiles -->
+      <div class="info-grid fade-in">
+        <div class="info-tile">
+          <div class="it-icon">⏱️</div>
+          <div class="it-label">Response time</div>
+          <div class="it-val">Usually within 24–48 hours</div>
+        </div>
+        <div class="info-tile">
+          <div class="it-icon">🌍</div>
+          <div class="it-label">Language</div>
+          <div class="it-val">English & Serbian (BS/HR/SR)</div>
+        </div>
+        <div class="info-tile">
+          <div class="it-icon">📝</div>
+          <div class="it-label">Preferred format</div>
+          <div class="it-val">Detailed, technical discussion</div>
+        </div>
+        <div class="info-tile">
+          <div class="it-icon">🔬</div>
+          <div class="it-label">Approach</div>
+          <div class="it-val">Logic first, speculation later</div>
+        </div>
+      </div>
+
+      <!-- Quote -->
+      <div>class="abstract-box fade-in" style="border-left-color: var(--gold);">
+        <em>
+          "The mathematics is correct in the laboratory where the mirror is cold and the laser is weak.
+          But in the real sector, your model is a wooden stove. You calculate thrust, but ignore the
+          melting. You draw vectors, but forget atomic vibrations. In the vacuum of space, your
+          'perfect mirror' is only the most expensive barbecue in history."
+        </em>
+        <br><br>
+        — Darko, Project Shadow Solar Sail (2026)
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Bottom nav -->
+  <div> style="text-align:center; margin-top:70px; padding-top:40px; border-top:1px solid var(--border);" class="fade-in">
+    <p> style="color:var(--text-muted); margin-bottom:24px;">Explore the full analysis:</p>
+    <div> class="hero-buttons" style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+      <a href="index.html" class="btn btn-outline">🏠 Home</a>
+      <a href="engineering-analysis.html" class="btn btn-outline">⚙️ Engineering Analysis</a>
+      <a href="realistic-constraints.html" class="btn btn-primary">📊 Realistic Constraints</a>
+    </div>
+  </div>
+
+</div><!-- /page-wrapper -->
+
+<footer>
+  <p>
+    <span class="footer-brand">Shadow Solar Sail</span> &nbsp;|&nbsp;
+    Contact: <a href="mailto:darkomslisic30@gmail.com">darkomslisic30@gmail.com</a> &nbsp;|&nbsp;
+    &copy; 2026 Darko
+  </p>
+</footer>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('open');
+  }
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }});
+  }, { threshold: 0.08 });
+  fadeEls.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

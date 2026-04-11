@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering Analysis — Shadow Solar Sail</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
+
+    .fade-in { opacity:0; transform:translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity:1; transform:none; }
+
+    /* Inline formula render (no MathJax needed) */
+    .math-inline {
+      font-family: 'Courier New', monospace;
+      font-style: italic;
+      color: var(--accent-soft);
+      background: rgba(96,165,250,0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* Two-col layout for interactions */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 28px 0; }
+    @media(max-width:700px){ .two-col { grid-template-columns: 1fr; } }
+
+    /* Step by step */
+    .step-list { counter-reset: steps; list-style: none; padding: 0; }
+    .step-list li {
+      counter-increment: steps;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+    .step-list li::before {
+      content: counter(steps);
+      flex-shrink: 0;
+      width: 32px; height: 32px;
+      background: rgba(96,165,250,0.15);
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85em;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+    .step-list li div { color: var(--text-muted); line-height: 1.75; }
+    .step-list li strong { color: var(--text); }
+
+    /* Comparison table colour overrides */
+    .tbl-red  { color: var(--danger); }
+    .tbl-gold { color: var(--gold); }
+    .tbl-grn  { color: var(--success); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <a href="index.html" class="nav-brand">
+    <span class="brand-main">Shadow Solar Sail</span>
+    <span class="brand-sub">Solar Sail</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="engineering-analysis.html" class="active">Engineering Analysis</a></li>
+    <li><a href="realistic-constraints.html">Realistic Constraints</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="eyebrow">Project Shadow Solar Sail</div>
+  <h1>Engineering Analysis</h1>
+  <p>A critical engineering and physics analysis of the static solar thruster (Shkadov Thruster),
+     identifying the fundamental obstacles that separate theoretical elegance from practical reality.</p>
+</div>
+
+<div class="page-wrapper">
+
+  <!-- SECTION 1: THEORY -->
+  <section class="section fade-in">
+    <h2>1. Theoretical Foundation</h2>
+    <p>The starting point of the analysis was the application of Newton's Third Law at the photon level.
+       Although photons have no rest mass, they carry momentum defined by:</p>
+
+    <div class="formula">
+      p = E / c
+    </div>
+
+    <p>Where <span class="math-inline">p</span> is momentum, <span class="math-inline">E</span> is photon
+       energy, and <span class="math-inline">c</span> is the speed of light. Upon impact with an ideal
+       mirror, a photon transfers momentum <span class="math-inline">2p</span> (stopping and being
+       re-emitted in the opposite direction).</p>
+
+    <p>The resulting radiation pressure on a perfectly reflecting surface is:</p>
+
+    <div class="formula">
+      P_rad = 2I / c
+    </div>
+
+    <p>Where <span class="math-inline">I</span> is the irradiance (W/m²). At the solar surface, this is
+       approximately <span class="hl-gold">63.3 MW/m²</span>, yielding a radiation pressure of
+       <span class="hl-blue">≈ 0.42 N/m²</span> for a perfect reflector.</p>
+
+    <div class="alert alert-info fade-in">
+      <strong>Key insight:</strong> At the Sun's surface gravity of 274 m/s², for radiation pressure to
+      overcome gravity, the mirror's areal mass density must remain below
+      <span class="math-inline">P_rad / g_sun ≈ 1.53 mg/m²</span>. This is thinner than a soap bubble.
+    </div>
+  </section>
+
+  <!-- SECTION 2: SPECS -->
+  <section class="section fade-in">
+    <h2>2. Model Specifications (1:1 Scale Prototype)</h2>
+    <p>For the purposes of simulation and analysis, a full-scale model was defined with the
+       following parameters, mirroring a realistic proposal for a minimal Shkadov mirror:</p>
+
+    <table>
+      <thead>
+        <tr><th>Parameter</th><th>Value</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Mirror radius R</td>
+          <td class="highlight">50 metres</td>
+          <td>Full aperture: 100 m diameter</td>
+        </tr>
+        <tr>
+          <td>Coverage fraction</td>
+          <td class="highlight">30%</td>
+          <td>≈ 108° arc</td>
+        </tr>
+        <tr>
+          <td>Radiation source</td>
+          <td class="highlight">63.3 MW/m²</td>
+          <td>Equivalent to solar surface irradiance</td>
+        </tr>
+        <tr>
+          <td>Assumed reflectivity</td>
+          <td class="highlight">99.9%</td>
+          <td>Best-case theoretical graphene/metamaterial</td>
+        </tr>
+        <tr>
+          <td>Required areal density</td>
+          <td class="highlight tbl-red">&lt; 1.53 mg/m²</td>
+          <td>To overcome solar gravity at 1 AU</td>
+        </tr>
+        <tr>
+          <td>Graphene areal density</td>
+          <td class="highlight tbl-gold">0.77 mg/m²</td>
+          <td>Single layer; structurally insufficient</td>
+        </tr>
+        <tr>
+          <td>Photon absorption</td>
+          <td class="highlight tbl-red">0.1%</td>
+          <td>Even at 99.9% reflectivity</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>The critical problem identified at these dimensions is the <strong>mass balance paradox</strong>:
+       any material thick enough to be structurally stable will be too heavy to be levitated by
+       radiation pressure alone.</p>
+  </section>
+
+  <!-- SECTION 3: INTERACTIONS -->
+  <section class="section fade-in">
+    <h2>3. Photon–Surface and Photon–Photon Interactions</h2>
+
+    <div class="two-col">
+      <div class="panel">
+        <h3> style="margin-top:0;">A. Photon on Surface (Vibrational Effect)</h3>
+        <p>Every photon impact on a material atom (e.g. graphene) is not simply
+           "a ball bouncing off a wall." It is an energy transfer event that causes:</p>
+        <ul>
+          <li><strong>Electron excitation</strong> — electrons temporarily jump to higher energy states.</li>
+          <li><strong>Phonon generation</strong> — crystal lattice vibrations, manifesting as heat.</li>
+          <li><strong>Localised stress</strong> — at extreme flux, atomic bonds are strained beyond elastic limits.</li>
+        </ul>
+        <p>In vacuum, these vibrational energies accumulate because there is no convective cooling.
+           The only thermal release mechanism is blackbody radiation — which is insufficient at the
+           power densities involved.</p>
+      </div>
+      <div class="panel">
+        <h3> style="margin-top:0;">B. Photon–Photon Interference (30° Sector)</h3>
+        <p>Within the 30° coverage zone, incoming solar beams and outgoing reflected beams create
+           an extremely high electromagnetic energy density. This activates several QED processes:</p>
+        <ul>
+          <li><strong>Delbrück scattering</strong> — photon-photon interaction mediated by virtual electron-positron pairs.</li>
+          <li><strong>Vacuum birefringence</strong> — the polarisation state of light is modified by the intense EM field.</li>
+          <li><strong>Standing wave formation</strong> — interference nodes convert ordered kinetic energy into chaotic thermal noise.</li>
+        </ul>
+        <p>These effects degrade the net thrust vector, reducing effective momentum transfer below
+           the idealised theoretical value.</p>
+      </div>
+    </div>
+
+    <div class="alert alert-warning fade-in">
+      <strong>Quantification note:</strong> Delbrück scattering cross-sections are extremely small
+      at optical frequencies, but at solar surface irradiances (~63 MW/m²), the cumulative effect
+      over the reflective surface area becomes non-negligible. The interference standing waves are
+      the more dominant practical problem, redistributing energy spatially.
+    </div>
+  </section>
+
+  <!-- SECTION 4: THERMODYNAMICS -->
+  <section class="section fade-in">
+    <h2>4. Thermodynamic Collapse</h2>
+    <p>The most significant engineering objection to the theoretical model is its dismissal of the
+       <strong>Second Law of Thermodynamics in vacuum</strong>. Without convection (air), the mirror
+       becomes an insulated thermos bottle. Consider the following:</p>
+
+    <ol class="step-list">
+      <li>
+        <div>
+          <strong>Heat input:</strong> At 99.9% reflectivity, the absorbed power density is
+          0.1% × 63.3 MW/m² = <span class="hl-red">63,300 W/m²</span>.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Equilibrium calculation:</strong> Using Stefan-Boltzmann:
+          <span class="math-inline">P = εσT⁴</span>, setting ε = 0.9 (emissivity), the
+          equilibrium temperature is T = (63,300 / (0.9 × 5.67×10⁻⁸))^0.25 ≈
+          <span class="hl-red">2,090 K (≈ 1,820°C)</span>.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Material failure:</strong> Graphene theoretically survives to ~3,000 K
+          in vacuum, but real polycrystalline graphene films or composite mirrors fail
+          structurally well before that — typically between 900–1,500 K due to grain
+          boundary diffusion, sublimation of impurities, and rippling instabilities.
+        </div>
+      </li>
+      <li>
+        <div>
+          <strong>Time to failure:</strong> For a mirror of areal mass ~1 mg/m² with heat capacity
+          ~700 J/kg·K, absorbing 63.3 kW/m², the temperature would rise at approximately
+          <span class="hl-red">90,000 K/second</span> before radiative cooling activates.
+          Operational window: <em>milliseconds</em>.
+        </div>
+      </li>
+    </ol>
+
+    <div class="formula">
+      ΔT/Δt = P_absorbed / (m_area × c_p)
+             = 63,300 W/m² / (0.001 kg/m² × 700 J/kg·K)
+             ≈ 90,430 K/s
+    </div>
+
+    <p>This is not a solvable engineering problem with current materials. Even at 2.8 AU from the Sun
+       (where irradiance drops to ~174 W/m²), the equilibrium temperature for a 60% reflectivity mirror
+       still exceeds the softening point of most known refractory materials.</p>
+  </section>
+
+  <!-- SECTION 5: MATERIAL COMPARISON -->
+  <section class="section fade-in">
+    <h2>5. Material Comparison</h2>
+    <p>Below is a comparative evaluation of candidate reflector materials against the key engineering
+       requirements of the Shkadov mirror concept:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Material</th>
+          <th>Max Temp (K)</th>
+          <th>Reflectivity</th>
+          <th>Areal Density</th>
+          <th>Verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Single-layer graphene</td>
+          <td class="highlight tbl-grn">~3,000 K</td>
+          <td class="highlight tbl-gold">~97.7%</td>
+          <td class="highlight tbl-grn">0.77 mg/m²</td>
+          <td class="tbl-red">Fragile, tears under micrometeorite flux</td>
+        </tr>
+        <tr>
+          <td>Aluminium thin film</td>
+          <td class="highlight tbl-red">933 K</td>
+          <td class="highlight tbl-grn">91%</td>
+          <td class="highlight tbl-red">~270 mg/m² (100 nm)</td>
+          <td class="tbl-red">Too heavy, melts quickly</td>
+        </tr>
+        <tr>
+          <td>Beryllium foil</td>
+          <td class="highlight tbl-gold">1,560 K</td>
+          <td class="highlight tbl-gold">~55%</td>
+          <td class="highlight tbl-red">~180 mg/m²</td>
+          <td class="tbl-red">Too heavy, toxic hazard</td>
+        </tr>
+        <tr>
+          <td>Lunar regolith glass</td>
+          <td class="highlight tbl-red">~800 K</td>
+          <td class="highlight tbl-gold">~60%</td>
+          <td class="highlight tbl-red">1,780 kg total (100 m)</td>
+          <td class="tbl-red">Melts en route — see page 3</td>
+        </tr>
+        <tr>
+          <td>Ideal metamaterial (hypothetical)</td>
+          <td class="highlight tbl-grn">&gt;3,500 K</td>
+          <td class="highlight tbl-grn">~99.9%</td>
+          <td class="highlight tbl-grn">&lt; 1 mg/m²</td>
+          <td class="tbl-gold">Theoretically feasible; does not exist</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SECTION 6: FORCE BALANCE -->
+  <section class="section fade-in">
+    <h2>6. Force Balance and Net Thrust</h2>
+    <p>The radiation pressure on a perfect reflector positioned at solar distance R is given by:</p>
+
+    <div class="formula">
+      F_thrust = (2 × I × A × η) / c
+    </div>
+
+    <p>Where <span class="math-inline">A</span> is mirror area, <span class="math-inline">η</span>
+       is reflectivity, and <span class="math-inline">I</span> is solar irradiance at distance R.</p>
+
+    <p>For our R=50m model at the solar surface (I = 63.3 MW/m²):</p>
+
+    <div class="formula">
+      F_thrust = (2 × 63.3×10⁶ × π×50² × 0.999) / (3×10⁸)
+               ≈ 66,300 N (66.3 kN)
+    </div>
+
+    <p>This sounds substantial — but the solar gravitational force on the same mirror mass at the
+       solar surface (g_sun = 274 m/s²) is:</p>
+
+    <div class="formula">
+      For F_thrust = F_gravity:
+      m/A = F_thrust / (g × A) = (2I×η) / (c × g_sun)
+           = (2 × 63.3×10⁶ × 0.999) / (3×10⁸ × 274)
+           ≈ 1.54 mg/m²
+    </div>
+
+    <div class="alert alert-danger" style="margin-top:24px;">
+      <strong>The conflict is absolute:</strong> No physical material that can serve as a functional
+      optical mirror at these temperatures has an areal density below 1.54 mg/m². Even graphene
+      layers would require extreme reinforcement structures that push mass far above this limit.
+      The equation is not solvable with known chemistry.
+    </div>
+  </section>
+
+  <!-- CONCLUSIONS -->
+  <div class="conclusion-box fade-in">
+    <h2> style="margin-top:0; color:var(--gold);">Conclusions</h2>
+    <p>The Shkadov Thruster is a concept that is theoretically consistent with the fundamental laws
+       of physics, but reveals itself as impractical under detailed engineering analysis.
+       The principal limitations are not mathematical in nature — they arise from:</p>
+    <ol>
+      <li><strong>Vacuum thermodynamics:</strong> no convective cooling means even tiny absorption fractions
+          lead to catastrophic heating.</li>
+      <li><strong>Material limits:</strong> the areal density requirement is incompatible with
+          optical functionality and structural integrity in any known material.</li>
+      <li><strong>Nonlinear quantum effects:</strong> Delbrück scattering and interference-induced
+          standing waves reduce practical thrust below theoretical values.</li>
+    </ol>
+    <p><strong>Final assessment:</strong> Theoretically functional. Engineeringly unusable — until
+       materials science makes a breakthrough of several orders of magnitude.</p>
+    <div> style="margin-top:24px; display:flex; gap:16px; flex-wrap:wrap;">
+      <a href="realistic-constraints.html" class="btn btn-primary">Realistic Constraints →</a>
+      <a href="index.html" class="btn btn-outline">← Home</a>
+    </div>
+  </div>
+
+</div><!-- /page-wrapper -->
+
+<footer>
+  <p>
+    <span class="footer-brand">Shadow Solar Sail</span> &nbsp;|&nbsp;
+    Engineering Analysis &nbsp;|&nbsp;
+    Author: <a href="contact.html">Darko</a> &nbsp;|&nbsp;
+    &copy; 2026
+  </p>
+</footer>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('open');
+  }
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }});
+  }, { threshold: 0.08 });
+  fadeEls.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

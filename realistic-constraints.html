@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Realistic Constraints — Shadow Solar Sail</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; }
+
+    .fade-in { opacity:0; transform:translateY(22px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-in.visible { opacity:1; transform:none; }
+
+    /* Distance position cards */
+    .position-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 32px 0; }
+
+    .pos-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 26px;
+      border-top: 3px solid var(--border);
+    }
+    .pos-card.warning-card { border-top-color: var(--danger); }
+    .pos-card.caution-card { border-top-color: var(--gold); }
+    .pos-card.good-card    { border-top-color: var(--success); }
+
+    .pos-card .pos-label {
+      font-size: 0.76em;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .pos-card h3 { margin-top: 0; font-size: 1.05em; }
+
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.92em;
+    }
+    .metric-row:last-child { border-bottom: none; }
+    .metric-row .metric-key { color: var(--text-muted); }
+    .metric-row .metric-val { font-family: 'Courier New', monospace; font-weight: 600; }
+    .metric-row .metric-val.red   { color: var(--danger); }
+    .metric-row .metric-val.gold  { color: var(--gold); }
+    .metric-row .metric-val.green { color: var(--success); }
+    .metric-row .metric-val.blue  { color: var(--accent); }
+
+    /* Critical zone banner */
+    .zone-banner {
+      background: linear-gradient(135deg, #1a0a0a, #2d1010);
+      border: 2px solid var(--danger);
+      border-radius: 10px;
+      padding: 22px 28px;
+      margin: 28px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+    }
+    .zone-banner .zone-icon { font-size: 2em; flex-shrink: 0; margin-top: 2px; }
+    .zone-banner h3 { color: var(--danger); margin: 0 0 8px; font-size: 1em; }
+    .zone-banner p  { color: #fca5a5; margin: 0; font-size: 0.95em; line-height: 1.7; }
+
+    /* Chart area sizing fix */
+    .chart-box canvas { max-height: 260px; }
+
+    /* Tech spec list */
+    .spec-list { list-style: none; padding: 0; }
+    .spec-list li {
+      display: flex; justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.95em;
+    }
+    .spec-list li:last-child { border-bottom: none; }
+    .spec-list .sk { color: var(--text-muted); }
+    .spec-list .sv { font-family: 'Courier New', monospace; color: var(--gold); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <a href="index.html" class="nav-brand">
+    <span class="brand-main">Shadow Solar Sail</span>
+    <span class="brand-sub">Solar Sail</span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="engineering-analysis.html">Engineering Analysis</a></li>
+    <li><a href="realistic-constraints.html" class="active">Realistic Constraints</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="eyebrow">Lunar Regolith Mirror — Variant Analysis</div>
+  <h1>Realistic Constraints</h1>
+  <p>A revised variant using sintered lunar regolith as the mirror material, targeting a final orbit
+     at 2.8 AU. Thermal behaviour, photon flux, and structural fate are modelled across the full
+     transfer trajectory.</p>
+</div>
+
+<div class="page-wrapper">
+
+  <!-- ABSTRACT -->
+  <div class="abstract-box fade-in">
+    <strong>Overview</strong><br><br>
+    This section analyses a more grounded engineering variant of the Shkadov mirror concept:
+    a thin reflector (64 μm / 2 particle layers) manufactured from sintered lunar regolith glass,
+    deployed from the Moon and transported to a target orbit at 2.8 AU using 10,000 ion-drive
+    satellites. We model the thermal behaviour at three key waypoints during transit, and assess
+    whether the mirror survives the journey to become an operational solar thruster component.
+    The findings are sobering.
+  </div>
+
+  <!-- MATERIAL SPECS -->
+  <section class="section fade-in">
+    <h2>1. Material Specifications — Lunar Regolith Mirror</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Mirror Diameter</div>
+        <div class="stat-value">100 m</div>
+        <div class="stat-unit">R = 50 m</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Thickness</div>
+        <div class="stat-value">64 μm</div>
+        <div class="stat-unit">2 particle layers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Reflectivity</div>
+        <div class="stat-value">60%</div>
+        <div class="stat-unit">optimistic for sintered glass</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Mass</div>
+        <div class="stat-value">1.78 t</div>
+        <div class="stat-unit">very optimistic</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Particle Diameter</div>
+        <div class="stat-value">32 μm</div>
+        <div class="stat-unit">average lunar dust grain</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Particles</div>
+        <div class="stat-value">~98 B</div>
+        <div class="stat-unit">billion particles</div>
+      </div>
+    </div>
+
+    <ul> class="spec-list" style="margin-top:28px;">
+      <li><span class="sk">Particle mass (per grain, 32 μm diam.)</span><span class="sv">1.8 × 10⁻⁸ g (18 ng)</span></li>
+      <li><span class="sk">Glass softening temperature</span><span class="sv">~550–600 °C (820–870 K)</span></li>
+      <li><span class="sk">Glass melting temperature</span><span class="sv">~1,100 °C (1,370 K)</span></li>
+      <li><span class="sk">Transport vehicles</span><span class="sv">10,000 ion-drive satellites</span></li>
+      <li><span class="sk">Target orbit</span><span class="sv">2.8 AU (heliocentric)</span></li>
+      <li><span class="sk">Solar irradiance at 2.8 AU</span><span class="sv">174 W/m²</span></li>
+    </ul>
+  </section>
+
+  <!-- ZONE BANNER -->
+  <div class="zone-banner fade-in">
+    <div class="zone-icon">⚠️</div>
+    <div>
+      <h3>CRITICAL FINDING: The mirror would likely begin to deform before reaching its target orbit.</h3>
+      <p>Below approximately 2.1–2.2 AU, the predicted mirror temperature exceeds the softening
+         point of sintered lunar glass (~550°C). At 1.4 AU (halfway point on the transfer orbit),
+         the temperature reaches ~720°C — enough to cause irreversible deformation, loss of
+         reflectivity, and structural failure of the 2-particle-layer lattice.</p>
+    </div>
+  </div>
+
+  <!-- THREE POSITION CARDS -->
+  <section class="section fade-in">
+    <h2>2. Behaviour at Transfer Waypoints</h2>
+
+    <div class="position-cards">
+
+      <!-- Card 1: 70% en route (1.96 AU) -->
+      <div class="pos-card warning-card">
+        <div class="pos-label">Waypoint 1 — 70% of transfer complete</div>
+        <h3> style="color:var(--danger);">1.96 AU — ⚠ HIGH RISK</h3>
+        <div class="metric-row">
+          <span class="metric-key">Solar irradiance</span>
+          <span class="metric-val blue">355 W/m²</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Radiation pressure (60% refl.)</span>
+          <span class="metric-val blue">1.61 μN/m²</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Total thrust (7,854 m²)</span>
+          <span class="metric-val gold">12.65 mN</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Absorbed power</span>
+          <span class="metric-val red">890 kW</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Predicted temperature</span>
+          <span class="metric-val red">~407°C</span>
+        </div>
+        <p style="margin-top:14px; font-size:0.88em; color:var(--text-muted);">
+          Significant lattice vibration. Particle oscillation begins. Minor thermal expansion.
+          Structure still intact — marginally.
+        </p>
+      </div>
+
+      <!-- Card 2: 50% en route (1.4 AU) -->
+      <div class="pos-card warning-card">
+        <div class="pos-label">Waypoint 2 — 50% of transfer complete</div>
+        <h3> style="color:var(--danger);">1.4 AU — ⛔ CRITICAL</h3>
+        <div class="metric-row">
+          <span class="metric-key">Solar irradiance</span>
+          <span class="metric-val blue">697 W/m²</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Radiation pressure (60% refl.)</span>
+          <span class="metric-val blue">3.16 μN/m²</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Total thrust (7,854 m²)</span>
+          <span class="metric-val gold">24.8 mN</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Absorbed power</span>
+          <span class="metric-val red">1.75 MW</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Predicted temperature</span>
+          <span class="metric-val red">~647°C ⚠</span>
+        </div>
+        <p>style="margin-top:14px; font-size:0.88em; color:var(--text-muted);">
+          Temperature exceeds softening point (~550°C). Micro-sublimation of volatile
+          trace elements begins. Reflectivity degrades from 60% → ~52%. Structural
+          deformation probable.
+        </p>
+      </div>
+
+      <!-- Card 3: Final position (2.8 AU) -->
+      <div class="pos-card good-card">
+        <div class="pos-label">Waypoint 3 — Final orbit (if reached)</div>
+        <h3> style="color:var(--success);">2.8 AU — ✅ STABLE (IF INTACT)</h3>
+        <div class="metric-row">
+          <span class="metric-key">Solar irradiance</span>
+          <span class="metric-val blue">174 W/m²</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Radiation pressure (60% refl.)</span>
+          <span class="metric-val blue">0.79 μN/m²</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Total thrust (7,854 m²)</span>
+          <span class="metric-val gold">6.21 mN</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Absorbed power</span>
+          <span class="metric-val green">437 kW</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-key">Predicted temperature</span>
+          <span class="metric-val green">~247°C ✅</span>
+        </div>
+        <p style="margin-top:14px; font-size:0.88em; color:var(--text-muted);">
+          Thermal equilibrium achieved. Structure mechanically stable at operating conditions.
+          However: only <strong>6.21 millinewtons</strong> of thrust total — an astronomically
+          tiny force relative to what moving a solar system requires.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="section fade-in">
+    <h2>3. Data Visualisation — Distance vs Physical Parameters</h2>
+    <p>The following charts model mirror temperature, solar gravitational acceleration, and photon
+       flux intensity as functions of heliocentric distance from 1.0 AU to 4.0 AU.</p>
+
+    <div class="charts-grid">
+      <!-- Temperature chart -->
+      <div class="chart-box">
+        <h4>Mirror Temperature (°C)</h4>
+        <canvas id="tempChart"></canvas>
+      </div>
+      <!-- Gravity chart -->
+      <div class="chart-box">
+        <h4>Solar Gravitational Acceleration (m/s²)</h4>
+        <canvas id="gravityChart"></canvas>
+      </div>
+      <!-- Photon flux chart -->
+      <div class="chart-box">
+        <h4>Photon Flux Intensity (×10²⁰ photons/s/m²)</h4>
+        <canvas id="photonChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRITICAL ANALYSIS -->
+  <section class="section fade-in">
+    <h2>4. Critical Analysis — Why the Journey Fails</h2>
+    <p>Even under the most optimistic assumptions (60% reflectivity, perfect sheet uniformity,
+       no micrometeorite damage), the transfer trajectory exposes the mirror to fatal conditions:</p>
+
+    <table>
+      <thead>
+        <tr><th>Distance (AU)</th><th>Temperature (°C)</th><th>Status</th><th>Notes</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1.0</td><td class="highlight tbl-red">920</td>
+          <td class="tbl-red">⛔ Catastrophic</td>
+          <td>Far above melting point. Plasma formation.</td>
+        </tr>
+        <tr>
+          <td>1.4</td><td class="highlight tbl-red">720</td>
+          <td class="tbl-red">⛔ Critical failure</td>
+          <td>Exceeds softening point. Deformation begins.</td>
+        </tr>
+        <tr>
+          <td>1.8</td><td class="highlight tbl-red">530</td>
+          <td class="tbl-red">⚠ Softening</td>
+          <td>Near/above softening point (~550°C).</td>
+        </tr>
+        <tr>
+          <td>2.2</td><td class="highlight tbl-gold">380</td>
+          <td class="tbl-gold">⚠ Marginal</td>
+          <td>Below softening; degradation from earlier waypoints.</td>
+        </tr>
+        <tr>
+          <td>2.8</td><td class="highlight tbl-grn">247</td>
+          <td class="tbl-grn">✅ Stable</td>
+          <td>Thermally safe — if the mirror still exists.</td>
+        </tr>
+        <tr>
+          <td>4.0</td><td class="highlight tbl-grn">155</td>
+          <td class="tbl-grn">✅ Cold</td>
+          <td>Very safe thermally; thrust negligible.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-danger" style="margin-top:8px;">
+      <strong>Conclusion:</strong> The mirror would need to survive over 1.8 AU of transit through
+      temperatures exceeding its structural limits before reaching a stable operating zone.
+      There is no passive thermal protection solution compatible with the required areal density constraint.
+    </div>
+  </section>
+
+  <!-- ENGINEERING PATHS FORWARD -->
+  <section class="section fade-in">
+    <h2>5. Potential Engineering Paths Forward</h2>
+    <p>This analysis does not close the door entirely. Rather, it defines the engineering challenges
+       that would need to be solved to make a lunar-regolith mirror concept viable:</p>
+
+    <div class="two-col" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr)); gap:20px;">
+      <div class="panel">
+        <h3 style="margin-top:0; color:var(--accent-soft);">🛡️ Active Thermal Protection</h3>
+        <p style="font-size:0.95em;">Deploy the mirror behind a disposable thermal shield during the
+           inner-system transit phase, jettisoned once the mirror clears 2.2 AU. Requires additional
+           mass and complex deployment mechanism.</p>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0; color:var(--accent-soft);">🧪 Refractory Composite Coating</h3>
+        <p style="font-size:0.95em;">Apply a thin layer of hafnium carbide or tantalum hafnium
+           carbide (melting point ~4,000 K) over the lunar glass substrate. Adds mass but extends
+           survival temperature by hundreds of degrees.</p>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0; color:var(--accent-soft);">🚀 Start Further Out</h3>
+        <p style="font-size:0.95em;">Manufacture and deploy the mirror directly at 2.5+ AU using
+           materials extracted from asteroid belt carbonaceous chondrites — avoiding the hot inner
+           solar system entirely during transit.</p>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0; color:var(--accent-soft);">🔬 New Material Discovery</h3>
+        <p style="font-size:0.95em;">A theoretical metamaterial combining &gt;99% reflectivity,
+           &gt;3,500 K thermal stability, and areal density &lt;1 mg/m² would solve all constraints
+           simultaneously. No such material currently exists or is theoretically predictable.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCALE PROBLEM -->
+  <section class="section fade-in">
+    <h2>6. The Scale Problem — Even If It Works</h2>
+    <p>Assuming the mirror survives and operates at 2.8 AU producing <span class="hl-gold">6.21 mN</span>
+       of thrust on the Solar System:</p>
+
+    <div class="formula">
+      Mass of Solar System ≈ 1.989 × 10³⁰ kg (Sun alone)
+      F = 6.21 × 10⁻³ N
+      a = F / M = 6.21×10⁻³ / 1.989×10³⁰
+        ≈ 3.1 × 10⁻³³ m/s²
+    </div>
+
+    <div class="alert alert-warning">
+      <strong>To put this in perspective:</strong> To move the Solar System by even 1 metre at this
+      acceleration would require approximately <span class="hl-red">10³² seconds</span> — roughly
+      3 × 10²⁴ years, or about 200 trillion times the current age of the Universe.
+      You would need roughly <strong>10²⁰ to 10²⁵</strong> of these mirrors operating simultaneously
+      to achieve any practical stellar locomotion on civilisation-relevant timescales.
+    </div>
+  </section>
+
+  <!-- CONCLUSION -->
+  <div class="conclusion-box fade-in">
+    <h2 style="margin-top:0; color:var(--gold);">Final Assessment</h2>
+    <p>The lunar regolith mirror concept represents a more grounded approach than theoretical
+       pure-graphene designs, but it still fails at the critical engineering juncture: the
+       transit to the operating orbit. The mirror would almost certainly begin to soften and
+       deform before reaching its target orbit at 2.8 AU.</p>
+    <p>Even if successfully deployed:</p>
+    <ul>
+      <li>The total thrust is <strong>6.21 millinewtons</strong> — negligible on any civilisation-relevant timescale.</li>
+      <li>Achieving meaningful solar system motion would require arrays of mirrors numbering in the
+          quintillions, implying a Type II Kardashev civilisation with complete mastery of the solar
+          system's resources.</li>
+      <li>The concept remains a valid intellectual benchmark and inspiration for
+          advanced materials research, but not a near- or medium-term engineering deliverable.</li>
+    </ul>
+    <p><em>"The mathematics is correct in the laboratory where the mirror is cold and the laser is weak.
+       But in the real sector, your model is a wooden stove. You calculate thrust, but ignore the
+       melting. You draw vectors, but forget atomic vibrations."</em></p>
+    <div style="margin-top:24px; display:flex; gap:16px; flex-wrap:wrap;">
+      <a href="contact.html" class="btn btn-primary">Contact the Author →</a>
+      <a href="engineering-analysis.html" class="btn btn-outline">← Engineering Analysis</a>
+    </div>
+  </div>
+
+</div><!-- /page-wrapper -->
+
+<footer>
+  <p>
+    <span class="footer-brand">Shadow Solar Sail</span> &nbsp;|&nbsp;
+    Realistic Constraints &nbsp;|&nbsp;
+    Author: <a href="contact.html">Darko</a> &nbsp;|&nbsp;
+    &copy; 2026
+  </p>
+</footer>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('navLinks').classList.toggle('open');
+  }
+
+  // ====== CHART: Temperature ======
+  new Chart(document.getElementById('tempChart'), {
+    type: 'line',
+    data: {
+      labels: ['1.0', '1.4', '1.8', '2.2', '2.6', '3.0', '3.5', '4.0'],
+      datasets: [
+        {
+          label: 'Mirror Temperature (°C)',
+          data: [920, 720, 530, 390, 300, 235, 185, 155],
+          borderColor: '#fb7185',
+          backgroundColor: 'rgba(251,113,133,0.08)',
+          borderWidth: 3, tension: 0.35, pointRadius: 4, fill: true
+        },
+        {
+          label: 'Softening Point (~550°C)',
+          data: [550,550,550,550,550,550,550,550],
+          borderColor: '#fbbf24', borderDash: [6,3], borderWidth: 2,
+          pointRadius: 0
+        },
+        {
+          label: 'Melting Point (~1,100°C)',
+          data: [1100,1100,1100,1100,1100,1100,1100,1100],
+          borderColor: '#ef4444', borderDash: [3,3], borderWidth: 2,
+          pointRadius: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top', labels: { color: '#94a3b8', boxWidth: 14, font: { size: 11 }}}},
+      scales: {
+        x: { ticks: { color: '#64748b' }, grid: { color: '#1e2937' }, title: { display: true, text: 'Distance (AU)', color: '#64748b' }},
+        y: { beginAtZero: true, ticks: { color: '#64748b' }, grid: { color: '#1e2937' }, title: { display: true, text: 'Temperature (°C)', color: '#64748b' }}
+      }
+    }
+  });
+
+  // ====== CHART: Gravity ======
+  new Chart(document.getElementById('gravityChart'), {
+    type: 'line',
+    data: {
+      labels: ['1.0', '1.4', '1.8', '2.2', '2.6', '3.0', '3.5', '4.0'],
+      datasets: [{
+        label: 'Solar Gravity (m/s²)',
+        data: [0.00593, 0.00302, 0.00183, 0.00122, 0.00088, 0.00066, 0.00048, 0.00037],
+        borderColor: '#60a5fa',
+        backgroundColor: 'rgba(96,165,250,0.07)',
+        borderWidth: 3, tension: 0.4, pointRadius: 4, fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }},
+      scales: {
+        x: { ticks: { color: '#64748b' }, grid: { color: '#1e2937' }, title: { display: true, text: 'Distance (AU)', color: '#64748b' }},
+        y: { ticks: { color: '#64748b' }, grid: { color: '#1e2937' }, title: { display: true, text: 'Gravity (m/s²)', color: '#64748b' }}
+      }
+    }
+  });
+
+  // ====== CHART: Photon Flux ======
+  new Chart(document.getElementById('photonChart'), {
+    type: 'line',
+    data: {
+      labels: ['1.0', '1.4', '1.8', '2.2', '2.6', '3.0', '3.5', '4.0'],
+      datasets: [{
+        label: 'Photon Flux (×10²⁰ /s/m²)',
+        data: [18.4, 9.35, 5.67, 3.79, 2.72, 2.04, 1.50, 1.15],
+        borderColor: '#4ade80',
+        backgroundColor: 'rgba(74,222,128,0.07)',
+        borderWidth: 3, tension: 0.4, pointRadius: 4, fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false }},
+      scales: {
+        x: { ticks: { color: '#64748b' }, grid: { color: '#1e2937' }, title: { display: true, text: 'Distance (AU)', color: '#64748b' }},
+        y: { ticks: { color: '#64748b' }, grid: { color: '#1e2937' }, title: { display: true, text: '×10²⁰ photons/s/m²', color: '#64748b' }}
+      }
+    }
+  });
+
+  // Fade-in
+  const fadeEls = document.querySelectorAll('.fade-in');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }});
+  }, { threshold: 0.07 });
+  fadeEls.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
